@@ -67,10 +67,6 @@
             width: 140px;
         }
 
-        .character-name-input:focus {
-            border-color: #5b6e8c;
-        }
-
         .add-character-btn {
             background: #2a6d8f;
             border: none;
@@ -308,7 +304,7 @@
         </div>
         <div class="tabs" id="tabsContainer"></div>
     </div>
-    <div class="save-status" id="saveStatus"></div>
+    <div class="save-status" id="saveStatus">🕐 Синхронизация с серверным временем...</div>
     <div class="character-content" id="characterContent"></div>
     <div class="server-time" id="serverTimeDisplay"></div>
 </div>
@@ -328,18 +324,15 @@
             const serverTime = new Date(data.utc_datetime);
             const localTime = new Date();
             serverTimeOffset = serverTime.getTime() - localTime.getTime();
-            
-            document.getElementById('saveStatus').innerHTML = '';
+            document.getElementById('saveStatus').innerHTML = '✅ Серверное время синхронизировано';
             setTimeout(() => {
                 const statusEl = document.getElementById('saveStatus');
-                if (statusEl) statusEl.innerHTML = '';
+                if (statusEl) statusEl.innerHTML = '💾 Автосохранение';
             }, 2000);
-            
             return true;
         } catch (error) {
-            console.warn('');
             serverTimeOffset = 0;
-            document.getElementById('saveStatus').innerHTML = '';
+            document.getElementById('saveStatus').innerHTML = '⚠️ Локальное время';
             return false;
         }
     }
@@ -396,7 +389,8 @@
         localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
     }
 
-    function updateAllTimers() {
+    // === ОБНОВЛЕНИЕ ТОЛЬКО ТАЙМЕРОВ (без перерисовки всей страницы) ===
+    function updateTimersOnly() {
         const now = getCurrentServerTime();
         let changed = false;
         
@@ -411,21 +405,35 @@
                     quest.status = 'available';
                     changed = true;
                 }
-                quest._cachedRemaining = Math.max(0, remaining);
+                
+                // Обновляем отображение таймера в DOM
+                const timerElement = document.getElementById(`timer_${char.id}_${quest.id}`);
+                if (timerElement && remaining > 0) {
+                    timerElement.innerHTML = `⏱️ ${formatTime(remaining)}`;
+                } else if (timerElement && remaining <= 0) {
+                    timerElement.innerHTML = `✓ Доступно`;
+                    timerElement.classList.add('available-text');
+                    // Обновляем статус
+                    const statusElement = document.getElementById(`status_${char.id}_${quest.id}`);
+                    if (statusElement) {
+                        statusElement.innerHTML = 'доступен';
+                        statusElement.classList.add('available');
+                    }
+                }
             }
         }
         
         if (changed) {
             saveToStorage();
+            // Перерисовываем только если статус изменился
+            if (currentCharacterId) {
+                renderCurrentCharacter();
+            }
         }
         
         const serverTimeEl = document.getElementById('serverTimeDisplay');
         if (serverTimeEl) {
-            serverTimeEl.innerHTML = ``;
-        }
-        
-        if (currentCharacterId) {
-            renderCurrentCharacter();
+            serverTimeEl.innerHTML = `🕐 Серверное время: ${now.toLocaleTimeString('ru-RU')}`;
         }
     }
 
@@ -445,8 +453,7 @@
             name: name.trim(),
             totalSeconds: totalSeconds,
             endTime: endTime.toISOString(),
-            status: 'active',
-            _cachedRemaining: totalSeconds
+            status: 'active'
         };
         char.quests.push(newQuest);
         saveToStorage();
@@ -603,19 +610,19 @@
                     saveToStorage();
                 }
                 
-                const timerPart = isAvailable 
-                    ? `<div class="available-text">✓ Доступно</div>`
-                    : `<div class="timer-display">⏱️ ${formatTime(remaining)}</div>`;
+                const timerDisplay = isAvailable 
+                    ? `<div class="available-text" id="timer_${character.id}_${quest.id}">✓ Доступно</div>`
+                    : `<div class="timer-display" id="timer_${character.id}_${quest.id}">⏱️ ${formatTime(remaining)}</div>`;
                 const statusClass = isAvailable ? 'quest-status available' : 'quest-status';
                 const statusText = isAvailable ? 'доступен' : 'в процессе';
                 
                 return `<div class="quest-card">
                             <div class="quest-info">
                                 <div class="quest-name">📜 ${escapeHtml(quest.name)}</div>
-                                <div class="${statusClass}">${statusText}</div>
+                                <div class="${statusClass}" id="status_${character.id}_${quest.id}">${statusText}</div>
                             </div>
                             <div class="quest-right">
-                                ${timerPart}
+                                ${timerDisplay}
                                 <div class="action-buttons">
                                     <button class="icon-btn" data-action="restart" data-quest-id="${quest.id}" title="Перезапустить">↻</button>
                                     <button class="icon-btn" data-action="delete" data-quest-id="${quest.id}" title="Удалить">✕</button>
@@ -694,7 +701,6 @@
         
         const loaded = loadFromStorage();
         
-        // Просто загружаем то, что есть. НИКАКИХ ТЕСТОВЫХ ДАННЫХ!
         if (loaded && characters.length > 0) {
             if (characters.length > 0 && !currentCharacterId) {
                 setCurrentCharacter(characters[0].id);
@@ -703,14 +709,14 @@
                 renderCurrentCharacter();
             }
         } else {
-            // Пустой старт — без персонажей и квестов
             renderTabs();
             renderCurrentCharacter();
         }
         
+        // Запускаем обновление ТОЛЬКО таймеров (не перерисовываем страницу)
         if (tickInterval) clearInterval(tickInterval);
         tickInterval = setInterval(() => {
-            updateAllTimers();
+            updateTimersOnly();
         }, 1000);
         
         const addCharBtn = document.getElementById('addCharacterBtn');
