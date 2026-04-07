@@ -326,7 +326,7 @@
             const localTime = new Date();
             serverTimeOffset = serverTime.getTime() - localTime.getTime();
             
-            document.getElementById('saveStatus').innerHTML = '✅ Синхронизация с серверным временем выполнена';
+            document.getElementById('saveStatus').innerHTML = '';
             setTimeout(() => {
                 const statusEl = document.getElementById('saveStatus');
                 if (statusEl) statusEl.innerHTML = '💾 Все данные сохраняются автоматически';
@@ -336,7 +336,7 @@
         } catch (error) {
             console.warn('Не удалось получить серверное время, используем локальное');
             serverTimeOffset = 0;
-            document.getElementById('saveStatus').innerHTML = '⚠️ Используется локальное время';
+            document.getElementById('saveStatus').innerHTML = '';
             return false;
         }
     }
