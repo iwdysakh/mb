@@ -77,6 +77,10 @@
             cursor: pointer;
         }
 
+        .add-quest-global {
+            background: #3b6e47;
+        }
+
         .tabs {
             display: flex;
             flex-wrap: wrap;
@@ -116,69 +120,6 @@
         .character-content {
             padding: 20px 24px 28px 24px;
             background: #0f1117;
-        }
-
-        .add-quest-panel {
-            margin-bottom: 24px;
-            background: #14181f;
-            padding: 18px 20px;
-            border-radius: 28px;
-        }
-
-        .quest-name-input {
-            width: 100%;
-            background: #1e212a;
-            border: 1px solid #2d313c;
-            padding: 12px 18px;
-            border-radius: 44px;
-            font-size: 0.95rem;
-            color: white;
-            outline: none;
-            margin-bottom: 16px;
-        }
-
-        .time-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-
-        .time-field {
-            flex: 1;
-            background: #1e212a;
-            border: 1px solid #2d313c;
-            border-radius: 44px;
-            padding: 10px 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .time-field label {
-            color: #8f95b0;
-            font-size: 0.85rem;
-        }
-
-        .time-field input {
-            background: transparent;
-            border: none;
-            color: white;
-            font-size: 1rem;
-            width: 60px;
-            outline: none;
-        }
-
-        .add-quest-btn {
-            background: #2a6d8f;
-            border: none;
-            color: white;
-            font-weight: 600;
-            padding: 12px 24px;
-            border-radius: 48px;
-            font-size: 0.95rem;
-            cursor: pointer;
-            width: 100%;
         }
 
         .quests-list {
@@ -275,20 +216,97 @@
             color: #6f768b;
         }
 
-        .save-status {
-            font-size: 0.7rem;
-            color: #4c9fcf;
-            text-align: right;
-            padding: 8px 24px 0 24px;
+        /* Модальное окно */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
         }
-
-        .server-time {
-            font-size: 0.7rem;
-            color: #6f768b;
-            text-align: right;
-            padding: 4px 24px;
-            background: #0b0d12;
-            border-top: 1px solid #1a1d25;
+        .modal.active {
+            display: flex;
+        }
+        .modal-content {
+            background: #181c24;
+            border-radius: 32px;
+            padding: 28px;
+            width: 90%;
+            max-width: 450px;
+            border: 1px solid #2d313c;
+        }
+        .modal-content h3 {
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+        }
+        .modal-content input {
+            width: 100%;
+            background: #1e212a;
+            border: 1px solid #2d313c;
+            padding: 12px 18px;
+            border-radius: 44px;
+            font-size: 0.95rem;
+            color: white;
+            outline: none;
+            margin-bottom: 16px;
+        }
+        .time-row-modal {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .time-field-modal {
+            flex: 1;
+            background: #1e212a;
+            border: 1px solid #2d313c;
+            border-radius: 44px;
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .time-field-modal label {
+            color: #8f95b0;
+            font-size: 0.8rem;
+        }
+        .time-field-modal input {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 0.9rem;
+            width: 50px;
+            margin: 0;
+            padding: 0;
+        }
+        .modal-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+        .modal-buttons button {
+            padding: 10px 20px;
+            border-radius: 40px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .modal-submit {
+            background: #2a6d8f;
+            color: white;
+        }
+        .modal-cancel {
+            background: #2d313c;
+            color: #ccd6f0;
+        }
+        .flex-buttons {
+            display: flex;
+            gap: 8px;
+            align-items: center;
         }
     </style>
 </head>
@@ -297,25 +315,56 @@
     <div class="characters-bar">
         <div class="characters-header">
             <h2>⚔️ Персонажи</h2>
-            <div class="add-character-form">
-                <input type="text" id="newCharacterName" class="character-name-input" placeholder="Имя" autocomplete="off">
-                <button id="addCharacterBtn" class="add-character-btn">+ Добавить</button>
+            <div class="flex-buttons">
+                <div class="add-character-form">
+                    <input type="text" id="newCharacterName" class="character-name-input" placeholder="Имя" autocomplete="off">
+                    <button id="addCharacterBtn" class="add-character-btn">+ Персонаж</button>
+                </div>
+                <button id="openQuestModalBtn" class="add-character-btn add-quest-global">+ Квест</button>
             </div>
         </div>
         <div class="tabs" id="tabsContainer"></div>
     </div>
-    <div class="save-status" id="saveStatus">🕐 Синхронизация с серверным временем...</div>
     <div class="character-content" id="characterContent"></div>
-    <div class="server-time" id="serverTimeDisplay"></div>
+</div>
+
+<!-- Модальное окно для добавления квеста -->
+<div id="questModal" class="modal">
+    <div class="modal-content">
+        <h3>➕ Новый квест</h3>
+        <input type="text" id="modalQuestName" placeholder="Название квеста" autocomplete="off">
+        <div class="time-row-modal">
+            <div class="time-field-modal"><label>📅 Дни</label><input type="number" id="modalDays" value="0" min="0"></div>
+            <div class="time-field-modal"><label>⏰ Часы</label><input type="number" id="modalHours" value="0" min="0" max="23"></div>
+            <div class="time-field-modal"><label>⏱️ Минуты</label><input type="number" id="modalMinutes" value="5" min="0" max="59"></div>
+        </div>
+        <div class="modal-buttons">
+            <button class="modal-cancel" id="cancelQuestBtn">Отмена</button>
+            <button class="modal-submit" id="submitQuestBtn">Добавить</button>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно подтверждения удаления персонажа -->
+<div id="confirmModal" class="modal">
+    <div class="modal-content">
+        <h3>⚠️ Удалить персонажа?</h3>
+        <p style="margin-bottom: 20px; color: #b9c2d4;">Все квесты этого персонажа будут удалены без возможности восстановления.</p>
+        <div class="modal-buttons">
+            <button class="modal-cancel" id="cancelConfirmBtn">Отмена</button>
+            <button class="modal-submit" id="confirmDeleteBtn">Удалить</button>
+        </div>
+    </div>
 </div>
 
 <script>
-    const STORAGE_KEY = 'quest_timer_server_v2';
+    const STORAGE_KEY = 'quest_timer_server_v3';
     let characters = [];
     let currentCharacterId = null;
     let nextCharacterId = 1;
     let serverTimeOffset = 0;
     let tickInterval = null;
+    let pendingDeleteCharacterId = null;
 
     async function syncServerTime() {
         try {
@@ -324,15 +373,9 @@
             const serverTime = new Date(data.utc_datetime);
             const localTime = new Date();
             serverTimeOffset = serverTime.getTime() - localTime.getTime();
-            document.getElementById('saveStatus').innerHTML = '✅ Серверное время синхронизировано';
-            setTimeout(() => {
-                const statusEl = document.getElementById('saveStatus');
-                if (statusEl) statusEl.innerHTML = '💾 Автосохранение';
-            }, 2000);
             return true;
         } catch (error) {
             serverTimeOffset = 0;
-            document.getElementById('saveStatus').innerHTML = '⚠️ Локальное время';
             return false;
         }
     }
@@ -389,7 +432,6 @@
         localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
     }
 
-    // === ОБНОВЛЕНИЕ ТОЛЬКО ТАЙМЕРОВ (без перерисовки всей страницы) ===
     function updateTimersOnly() {
         const now = getCurrentServerTime();
         let changed = false;
@@ -397,23 +439,18 @@
         for (let char of characters) {
             for (let quest of char.quests) {
                 if (quest.status === 'available') continue;
-                
                 const endTime = new Date(quest.endTime);
                 const remaining = Math.floor((endTime - now) / 1000);
-                
                 if (remaining <= 0) {
                     quest.status = 'available';
                     changed = true;
                 }
-                
-                // Обновляем отображение таймера в DOM
                 const timerElement = document.getElementById(`timer_${char.id}_${quest.id}`);
                 if (timerElement && remaining > 0) {
                     timerElement.innerHTML = `⏱️ ${formatTime(remaining)}`;
                 } else if (timerElement && remaining <= 0) {
                     timerElement.innerHTML = `✓ Доступно`;
                     timerElement.classList.add('available-text');
-                    // Обновляем статус
                     const statusElement = document.getElementById(`status_${char.id}_${quest.id}`);
                     if (statusElement) {
                         statusElement.innerHTML = 'доступен';
@@ -422,32 +459,20 @@
                 }
             }
         }
-        
         if (changed) {
             saveToStorage();
-            // Перерисовываем только если статус изменился
-            if (currentCharacterId) {
-                renderCurrentCharacter();
-            }
-        }
-        
-        const serverTimeEl = document.getElementById('serverTimeDisplay');
-        if (serverTimeEl) {
-            serverTimeEl.innerHTML = `🕐 Серверное время: ${now.toLocaleTimeString('ru-RU')}`;
+            if (currentCharacterId) renderCurrentCharacter();
         }
     }
 
-    function addQuest(characterId, name, days, hours, minutes) {
+    function addQuestToCharacter(characterId, name, days, hours, minutes) {
         const char = characters.find(c => c.id === characterId);
         if (!char) return false;
         if (!name || name.trim() === '') return false;
-        
         const totalSeconds = (days * 86400) + (hours * 3600) + (minutes * 60);
         if (totalSeconds <= 0) return false;
-        
         const now = getCurrentServerTime();
         const endTime = new Date(now.getTime() + totalSeconds * 1000);
-        
         const newQuest = {
             id: char.nextQuestId++,
             name: name.trim(),
@@ -457,7 +482,6 @@
         };
         char.quests.push(newQuest);
         saveToStorage();
-        
         if (currentCharacterId === characterId) renderCurrentCharacter();
         return true;
     }
@@ -467,13 +491,11 @@
         if (!char) return;
         const quest = char.quests.find(q => q.id === questId);
         if (!quest) return;
-        
         const now = getCurrentServerTime();
         const endTime = new Date(now.getTime() + quest.totalSeconds * 1000);
         quest.endTime = endTime.toISOString();
         quest.status = 'active';
         saveToStorage();
-        
         if (currentCharacterId === characterId) renderCurrentCharacter();
     }
 
@@ -502,19 +524,27 @@
         setCurrentCharacter(newChar.id);
     }
 
-    function deleteCharacter(characterId) {
-        const idx = characters.findIndex(c => c.id === characterId);
-        if (idx === -1) return;
-        characters.splice(idx, 1);
-        saveToStorage();
-        
-        if (characters.length === 0) {
-            currentCharacterId = null;
-            renderTabs();
-            renderEmptyState();
-        } else {
-            setCurrentCharacter(characters[0].id);
+    function confirmDeleteCharacter(characterId) {
+        pendingDeleteCharacterId = characterId;
+        document.getElementById('confirmModal').classList.add('active');
+    }
+
+    function executeDeleteCharacter() {
+        if (pendingDeleteCharacterId === null) return;
+        const idx = characters.findIndex(c => c.id === pendingDeleteCharacterId);
+        if (idx !== -1) {
+            characters.splice(idx, 1);
+            saveToStorage();
+            if (characters.length === 0) {
+                currentCharacterId = null;
+                renderTabs();
+                renderEmptyState();
+            } else {
+                setCurrentCharacter(characters[0].id);
+            }
         }
+        pendingDeleteCharacterId = null;
+        document.getElementById('confirmModal').classList.remove('active');
     }
 
     function setCurrentCharacter(characterId) {
@@ -533,12 +563,10 @@
     function renderTabs() {
         const container = document.getElementById('tabsContainer');
         if (!container) return;
-        
         if (characters.length === 0) {
             container.innerHTML = `<div style="padding: 8px 0; color: #6f768b;">Нет персонажей, добавьте первого</div>`;
             return;
         }
-        
         let html = '';
         for (let c of characters) {
             const isActive = (currentCharacterId === c.id);
@@ -548,7 +576,6 @@
                     </button>`;
         }
         container.innerHTML = html;
-        
         document.querySelectorAll('.tab').forEach(tab => {
             tab.addEventListener('click', (e) => {
                 if (e.target.classList && e.target.classList.contains('delete-character')) return;
@@ -556,66 +583,56 @@
                 if (!isNaN(id)) setCurrentCharacter(id);
             });
         });
-        
         document.querySelectorAll('[data-action="delete-character"]').forEach(btn => {
-            btn.removeEventListener('click', handleDeleteCharacter);
-            btn.addEventListener('click', handleDeleteCharacter);
+            btn.removeEventListener('click', handleDeleteCharacterClick);
+            btn.addEventListener('click', handleDeleteCharacterClick);
         });
     }
 
-    function handleDeleteCharacter(e) {
+    function handleDeleteCharacterClick(e) {
         e.stopPropagation();
         const id = parseInt(e.currentTarget.getAttribute('data-id'), 10);
-        if (!isNaN(id)) deleteCharacter(id);
+        if (!isNaN(id)) confirmDeleteCharacter(id);
     }
 
     function renderEmptyState() {
         const container = document.getElementById('characterContent');
         if (container) {
-            container.innerHTML = `<div style="text-align:center; padding: 60px 20px; color:#6f768b;">
-                ⚔️ Нет персонажей<br>Добавьте первого в панели сверху
-            </div>`;
+            container.innerHTML = `<div class="empty-message">⚔️ Нет персонажей<br>Добавьте первого в панели сверху</div>`;
         }
     }
 
     function renderCurrentCharacter() {
         const container = document.getElementById('characterContent');
         if (!container) return;
-        
         if (!currentCharacterId) {
             renderEmptyState();
             return;
         }
-        
         const character = characters.find(c => c.id === currentCharacterId);
         if (!character) {
             renderEmptyState();
             return;
         }
-        
         const now = getCurrentServerTime();
         const quests = character.quests;
         let questsHtml = '';
-        
         if (quests.length === 0) {
-            questsHtml = `<div class="empty-message">📭 Нет квестов. Добавьте первый квест!</div>`;
+            questsHtml = `<div class="empty-message">📭 Нет квестов. Нажмите «+ Квест»</div>`;
         } else {
             questsHtml = quests.map(quest => {
                 const endTime = new Date(quest.endTime);
                 const remaining = Math.max(0, Math.floor((endTime - now) / 1000));
                 const isAvailable = quest.status === 'available' || remaining <= 0;
-                
                 if (isAvailable && quest.status !== 'available') {
                     quest.status = 'available';
                     saveToStorage();
                 }
-                
                 const timerDisplay = isAvailable 
                     ? `<div class="available-text" id="timer_${character.id}_${quest.id}">✓ Доступно</div>`
                     : `<div class="timer-display" id="timer_${character.id}_${quest.id}">⏱️ ${formatTime(remaining)}</div>`;
                 const statusClass = isAvailable ? 'quest-status available' : 'quest-status';
                 const statusText = isAvailable ? 'доступен' : 'в процессе';
-                
                 return `<div class="quest-card">
                             <div class="quest-info">
                                 <div class="quest-name">📜 ${escapeHtml(quest.name)}</div>
@@ -631,59 +648,57 @@
                         </div>`;
             }).join('');
         }
-        
-        const formHtml = `<div class="add-quest-panel">
-                            <input type="text" id="questNameInput" class="quest-name-input" placeholder="Название квеста" autocomplete="off">
-                            <div class="time-row">
-                                <div class="time-field"><label>📅 Дни</label><input type="number" id="daysInput" value="0" min="0" step="1"></div>
-                                <div class="time-field"><label>⏰ Часы</label><input type="number" id="hoursInput" value="0" min="0" max="23" step="1"></div>
-                                <div class="time-field"><label>⏱️ Минуты</label><input type="number" id="minutesInput" value="5" min="0" max="59" step="1"></div>
-                            </div>
-                            <button id="addQuestBtn" class="add-quest-btn">+ Добавить квест</button>
-                        </div>
-                        <div class="quests-list" id="questsList">${questsHtml}</div>`;
-        container.innerHTML = formHtml;
-        
-        const addBtn = document.getElementById('addQuestBtn');
-        const questNameInput = document.getElementById('questNameInput');
-        const daysInput = document.getElementById('daysInput');
-        const hoursInput = document.getElementById('hoursInput');
-        const minutesInput = document.getElementById('minutesInput');
-        
-        if (addBtn) {
-            const handler = () => {
-                const name = questNameInput.value;
-                const days = parseInt(daysInput.value) || 0;
-                const hours = parseInt(hoursInput.value) || 0;
-                const minutes = parseInt(minutesInput.value) || 0;
-                if (addQuest(currentCharacterId, name, days, hours, minutes)) {
-                    questNameInput.value = '';
-                    daysInput.value = 0;
-                    hoursInput.value = 0;
-                    minutesInput.value = 5;
-                    questNameInput.focus();
-                } else if (!name.trim()) {
-                    questNameInput.placeholder = 'Введите название квеста';
-                    setTimeout(() => { questNameInput.placeholder = 'Название квеста'; }, 1500);
-                }
-            };
-            addBtn.addEventListener('click', handler);
-            questNameInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handler(); });
-        }
-        
+        container.innerHTML = `<div class="quests-list" id="questsList">${questsHtml}</div>`;
         document.querySelectorAll('[data-action="restart"]').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const questId = parseInt(btn.getAttribute('data-quest-id'), 10);
                 if (!isNaN(questId)) restartQuest(currentCharacterId, questId);
             });
         });
-        
         document.querySelectorAll('[data-action="delete"]').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const questId = parseInt(btn.getAttribute('data-quest-id'), 10);
                 if (!isNaN(questId)) deleteQuest(currentCharacterId, questId);
             });
         });
+    }
+
+    function openQuestModal() {
+        if (!currentCharacterId) {
+            alert('Сначала выберите или создайте персонажа');
+            return;
+        }
+        document.getElementById('modalQuestName').value = '';
+        document.getElementById('modalDays').value = 0;
+        document.getElementById('modalHours').value = 0;
+        document.getElementById('modalMinutes').value = 5;
+        document.getElementById('questModal').classList.add('active');
+    }
+
+    function closeQuestModal() {
+        document.getElementById('questModal').classList.remove('active');
+    }
+
+    function submitQuestFromModal() {
+        if (!currentCharacterId) {
+            alert('Персонаж не выбран');
+            closeQuestModal();
+            return;
+        }
+        const name = document.getElementById('modalQuestName').value;
+        const days = parseInt(document.getElementById('modalDays').value) || 0;
+        const hours = parseInt(document.getElementById('modalHours').value) || 0;
+        const minutes = parseInt(document.getElementById('modalMinutes').value) || 0;
+        if (!name.trim()) {
+            alert('Введите название квеста');
+            return;
+        }
+        if (days === 0 && hours === 0 && minutes === 0) {
+            alert('Укажите время больше 0');
+            return;
+        }
+        addQuestToCharacter(currentCharacterId, name, days, hours, minutes);
+        closeQuestModal();
     }
 
     function escapeHtml(str) {
@@ -698,13 +713,10 @@
 
     async function init() {
         await syncServerTime();
-        
         const loaded = loadFromStorage();
-        
         if (loaded && characters.length > 0) {
-            if (characters.length > 0 && !currentCharacterId) {
-                setCurrentCharacter(characters[0].id);
-            } else {
+            if (!currentCharacterId) setCurrentCharacter(characters[0].id);
+            else {
                 renderTabs();
                 renderCurrentCharacter();
             }
@@ -712,35 +724,44 @@
             renderTabs();
             renderCurrentCharacter();
         }
-        
-        // Запускаем обновление ТОЛЬКО таймеров (не перерисовываем страницу)
         if (tickInterval) clearInterval(tickInterval);
-        tickInterval = setInterval(() => {
-            updateTimersOnly();
-        }, 1000);
+        tickInterval = setInterval(() => updateTimersOnly(), 1000);
         
-        const addCharBtn = document.getElementById('addCharacterBtn');
-        const newCharInput = document.getElementById('newCharacterName');
-        if (addCharBtn) {
-            addCharBtn.addEventListener('click', () => {
-                const name = newCharInput.value;
-                if (name.trim()) {
-                    addCharacter(name);
-                    newCharInput.value = '';
-                } else {
-                    addCharacter('Новый персонаж');
-                    newCharInput.value = '';
-                }
-            });
-            newCharInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    const name = newCharInput.value;
-                    if (name.trim()) addCharacter(name);
-                    else addCharacter('Персонаж');
-                    newCharInput.value = '';
-                }
-            });
-        }
+        document.getElementById('addCharacterBtn').addEventListener('click', () => {
+            const name = document.getElementById('newCharacterName').value;
+            if (name.trim()) addCharacter(name);
+            else addCharacter('Новый персонаж');
+            document.getElementById('newCharacterName').value = '';
+        });
+        document.getElementById('newCharacterName').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const name = e.target.value;
+                if (name.trim()) addCharacter(name);
+                else addCharacter('Персонаж');
+                e.target.value = '';
+            }
+        });
+        
+        const openBtn = document.getElementById('openQuestModalBtn');
+        if (openBtn) openBtn.addEventListener('click', openQuestModal);
+        
+        document.getElementById('cancelQuestBtn').addEventListener('click', closeQuestModal);
+        document.getElementById('submitQuestBtn').addEventListener('click', submitQuestFromModal);
+        document.getElementById('questModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('questModal')) closeQuestModal();
+        });
+        
+        document.getElementById('cancelConfirmBtn').addEventListener('click', () => {
+            document.getElementById('confirmModal').classList.remove('active');
+            pendingDeleteCharacterId = null;
+        });
+        document.getElementById('confirmDeleteBtn').addEventListener('click', executeDeleteCharacter);
+        document.getElementById('confirmModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('confirmModal')) {
+                document.getElementById('confirmModal').classList.remove('active');
+                pendingDeleteCharacterId = null;
+            }
+        });
     }
     
     window.addEventListener('DOMContentLoaded', init);
