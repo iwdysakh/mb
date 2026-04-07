@@ -337,9 +337,9 @@
             
             return true;
         } catch (error) {
-            console.warn('Не удалось получить серверное время, используем локальное');
+            console.warn('');
             serverTimeOffset = 0;
-            document.getElementById('saveStatus').innerHTML = '⚠️ Используется локальное время';
+            document.getElementById('saveStatus').innerHTML = '';
             return false;
         }
     }
